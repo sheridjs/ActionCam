@@ -1,6 +1,7 @@
 using ICities;
 using UnityEngine;
 
+using System;
 using System.Collections;
 
 namespace BlueJayBird.ActionCam {
@@ -17,17 +18,47 @@ namespace BlueJayBird.ActionCam {
 
     public class ActionCamera : CameraExtensionBase {
 
+        // Debug log marker
+        private static string LOG_MARKER = "[ActionCam] ";
+
+        // Available services.
+        private static Service[] SERVICES = new Service[] { 
+                Service.FireDepartment, 
+                Service.PoliceDepartment,
+                Service.HealthCare,
+                Service.Disaster
+            };
+
+        // Random number generator.
+        private System.Random rn = new System.Random();
+
         public override string Name() {
             return "Action Cam!";
         }
 
         public override IEnumerator OnStart(ICamera camera) {
-            while (true) {
-                ushort carid = GetRandomVehicle(Service.PoliceDepartment);
+            Debug.Log(LOG_MARKER + "camera started");
+            // TODO: VehicleManager manager = Singleton<VehicleManager>.instance;
 
-                int camRoutine = FollowVehicle(carid, 10);
+            while (true) {                
+                ushort carid = ChooseVehicle();
+                Debug.Log(LOG_MARKER + "vehicle id = " + carid);
+                if (0 == carid) {
+                    // TODO: Look for a better way to handle cars not found.
+                    yield return WaitForNextFrame();
+                    continue;
+                }
+
+                int camRoutine = FollowVehicle(carid, 7);
                 yield return WaitForRoutineToFinish(camRoutine);
             }
+        }
+
+        // Choose a random vehicle from a random available service.
+        // If no item found, it will return an ID of 0.
+        private ushort ChooseVehicle() {
+            Service service = SERVICES[rn.Next(0, SERVICES.Length)];
+            return GetRandomVehicle(service);
         }
 
     }
