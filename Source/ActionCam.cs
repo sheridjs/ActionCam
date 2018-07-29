@@ -49,7 +49,8 @@ namespace BlueJayBird.ActionCam {
                     continue;
                 }
 
-                int camRoutine = FollowVehicle(carid, 7);
+                // TODO: Create a fade in/out routine
+                int camRoutine = ChooseRoutine(carid);
                 yield return WaitForRoutineToFinish(camRoutine);
             }
         }
@@ -60,6 +61,23 @@ namespace BlueJayBird.ActionCam {
             Service service = SERVICES[rn.Next(0, SERVICES.Length)];
             return GetRandomVehicle(service);
         }
+
+        private int ChooseRoutine(ushort id) {
+            // TODO: Create a set of camera routines
+            // TODO: Randomly select from available camera routines
+            // TODO: Create "last resort" road follow camera routine
+            return FollowVehicle(id, 7);
+        }
+
+        // TODO: Add some variety to "follow cam"
+
+        // TODO: Create "chase cam"
+
+        // TODO: Create "fly-by cam"
+
+        // TODO: Create "orbit cam"
+
+        // TODO: Create "static watch cam" (like Mario Kart) (overhead version?)
 
     }
 
