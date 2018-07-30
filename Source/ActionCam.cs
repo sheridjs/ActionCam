@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace BlueJayBird.ActionCam {
 
-	public class ActionCamMod : IUserMod {
+	public class ActionCam : IUserMod {
 		public string Name {
             get { return "Action Cam"; }
         }
