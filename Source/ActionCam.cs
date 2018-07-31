@@ -7,8 +7,11 @@ using System.Collections;
 namespace BlueJayBird.ActionCam {
 
 	public class ActionCam : IUserMod {
+
+        public static string NAME = "Action Cam!";
+
 		public string Name {
-            get { return "Action Cam"; }
+            get { return ActionCam.NAME; }
         }
 
 		public string Description {
@@ -33,7 +36,7 @@ namespace BlueJayBird.ActionCam {
         private System.Random rn = new System.Random();
 
         public override string Name() {
-            return "Action Cam!";
+            return ActionCam.NAME;
         }
 
         public override IEnumerator OnStart(ICamera camera) {
@@ -49,9 +52,10 @@ namespace BlueJayBird.ActionCam {
                     continue;
                 }
 
-                // TODO: Create a fade in/out routine
+                int fadeRoutine = StartRoutine(FadeInOut(7, 0.5f, 1));
                 int camRoutine = ChooseRoutine(carid);
                 yield return WaitForRoutineToFinish(camRoutine);
+                AbortRoutine(fadeRoutine);
             }
         }
 
@@ -67,6 +71,13 @@ namespace BlueJayBird.ActionCam {
             // TODO: Randomly select from available camera routines
             // TODO: Create "last resort" road follow camera routine
             return FollowVehicle(id, 7);
+        }
+
+        // Combine fade in and fade out routines over a given total duration
+        private IEnumerator FadeInOut(float totalDuration, float fadeInDuration = 1.0f, float fadeOutduration = 0.5f) {
+            yield return WaitForRoutineToFinish(FadeIn(fadeInDuration));
+            yield return Wait(totalDuration - fadeInDuration - fadeOutduration);
+            yield return WaitForRoutineToFinish(FadeOut(fadeOutduration));
         }
 
         // TODO: Add some variety to "follow cam"
