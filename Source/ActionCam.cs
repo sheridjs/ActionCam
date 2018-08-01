@@ -52,7 +52,7 @@ namespace BlueJayBird.ActionCam {
                     continue;
                 }
 
-                int fadeRoutine = StartRoutine(FadeInOut(7, 0.5f, 1));
+                int fadeRoutine = StartRoutine(FadeInOut(7));
                 int camRoutine = ChooseRoutine(carid);
                 yield return WaitForRoutineToFinish(camRoutine);
                 AbortRoutine(fadeRoutine);
@@ -74,7 +74,7 @@ namespace BlueJayBird.ActionCam {
         }
 
         // Combine fade in and fade out routines over a given total duration
-        private IEnumerator FadeInOut(float totalDuration, float fadeInDuration = 1.0f, float fadeOutduration = 0.5f) {
+        private IEnumerator FadeInOut(float totalDuration, float fadeInDuration = 0.5f, float fadeOutduration = 1.0f) {
             yield return WaitForRoutineToFinish(FadeIn(fadeInDuration));
             yield return Wait(totalDuration - fadeInDuration - fadeOutduration);
             yield return WaitForRoutineToFinish(FadeOut(fadeOutduration));
