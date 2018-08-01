@@ -31,7 +31,7 @@ namespace BlueJayBird.ActionCam {
                 Service.HealthCare,
                 Service.Disaster
             };
-
+        
         // Random number generator.
         private System.Random rn = new System.Random();
 
@@ -52,10 +52,7 @@ namespace BlueJayBird.ActionCam {
                     continue;
                 }
 
-                int fadeRoutine = StartRoutine(FadeInOut(7));
-                int camRoutine = ChooseRoutine(carid);
-                yield return WaitForRoutineToFinish(camRoutine);
-                AbortRoutine(fadeRoutine);
+                yield return WaitForRoutineToFinish(ChooseRoutine(carid));
             }
         }
 
@@ -67,10 +64,14 @@ namespace BlueJayBird.ActionCam {
         }
 
         private int ChooseRoutine(ushort id) {
+            IEnumerator routine;
             // TODO: Create a set of camera routines
-            // TODO: Randomly select from available camera routines
             // TODO: Create "last resort" road follow camera routine
-            return FollowVehicle(id, 7);
+
+            // TODO: Randomly select from available camera routines
+            routine = FollowCam(id);
+
+            return StartRoutine(routine);
         }
 
         // Combine fade in and fade out routines over a given total duration
@@ -81,6 +82,12 @@ namespace BlueJayBird.ActionCam {
         }
 
         // TODO: Add some variety to "follow cam"
+        private IEnumerator FollowCam(ushort id) {
+            float duration = 7;
+            int fadeRoutine = StartRoutine(FadeInOut(duration));
+            yield return WaitForRoutineToFinish(FollowVehicle(id, duration));
+            AbortRoutine(fadeRoutine);
+        }
 
         // TODO: Create "chase cam"
 
