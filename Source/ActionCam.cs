@@ -19,6 +19,15 @@ namespace BlueJayBird.ActionCam {
         }
 	}
 
+    public enum ActionCamRoutine {
+        AerialCam,
+        ChaseCam,
+        FlyByCam,
+        FollowCam,
+        OrbitCam,
+        StaticCam,
+    }
+
     public class ActionCamera : CameraExtensionBase {
 
         // Debug log marker
@@ -26,11 +35,17 @@ namespace BlueJayBird.ActionCam {
 
         // Available services.
         private static Service[] SERVICES = new Service[] { 
-                Service.FireDepartment, 
-                Service.PoliceDepartment,
-                Service.HealthCare,
-                Service.Disaster
-            };
+            Service.FireDepartment, 
+            Service.PoliceDepartment,
+            Service.HealthCare,
+            Service.Disaster
+        };
+
+        private static ActionCamRoutine[] CAM_ROUTINES = new ActionCamRoutine[] {
+            ActionCamRoutine.AerialCam,
+            ActionCamRoutine.ChaseCam,
+            ActionCamRoutine.FollowCam,
+        };
         
         // Random number generator.
         private System.Random rn = new System.Random();
@@ -65,12 +80,26 @@ namespace BlueJayBird.ActionCam {
 
         private int ChooseRoutine(ushort id) {
             IEnumerator routine;
-            // TODO: Create a set of camera routines
-            // TODO: Create "last resort" road follow camera routine
-
-            // TODO: Randomly select from available camera routines
-            routine = FollowCam(id);
-
+            
+            // Randomly select from available camera routines
+            ActionCamRoutine routineType = CAM_ROUTINES[rn.Next(0, CAM_ROUTINES.Length)];
+            switch (routineType)
+            {
+                case ActionCamRoutine.AerialCam:
+                    routine = AerialCam(id);
+                    break;
+                case ActionCamRoutine.ChaseCam:
+                    routine = ChaseCam(id);
+                    break;
+                case ActionCamRoutine.FollowCam:
+                    routine = FollowCam(id);
+                    break;
+                default:
+                    // TODO: Create "last resort" road follow camera routine
+                    routine = FollowCam(id);
+                    break;
+            }
+            
             return StartRoutine(routine);
         }
 
@@ -88,17 +117,33 @@ namespace BlueJayBird.ActionCam {
             return angle * step;
         }
 
-        // Follow a vehicle from above.
+        // Follow a vehicle from above at an angle.
         private IEnumerator FollowCam(ushort id) {
             float duration = 7;
             int fadeRoutine = StartRoutine(FadeInOut(duration));
-            yield return WaitForRoutineToFinish(FollowVehicle(id, duration, 50, 45, RandomAngle(45)));
+            int camRoutine = FollowVehicle(id, duration, 50, 45, RandomAngle(45));
+            yield return WaitForRoutineToFinish(camRoutine);
             AbortRoutine(fadeRoutine);
         }
 
-        // TODO: Create "chase cam"
+        // Follow a vehicle from behind
+        private IEnumerator ChaseCam(ushort id) {
+            float duration = 7;
+            int fadeRoutine = StartRoutine(FadeInOut(duration));
+            // TODO: Fix bumpiness
+            int camRoutine = FollowVehicle(id, duration, 40, 15, 0, true);
+            yield return WaitForRoutineToFinish(camRoutine);
+            AbortRoutine(fadeRoutine);
+        }
 
-        // TODO: Create "aerial cam"
+        // Follow a vehicle from overhead
+        private IEnumerator AerialCam(ushort id) {
+            float duration = 10;
+            int fadeRoutine = StartRoutine(FadeInOut(duration, 2, 2));
+            int camRoutine = FollowVehicle(id, duration, 200, RandomAngle(5, 75, 95), RandomAngle(5));
+            yield return WaitForRoutineToFinish(camRoutine);
+            AbortRoutine(fadeRoutine);
+        }
 
         // TODO: Create "fly-by cam"
 
