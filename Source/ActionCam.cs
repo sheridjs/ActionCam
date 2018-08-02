@@ -81,11 +81,18 @@ namespace BlueJayBird.ActionCam {
             yield return WaitForRoutineToFinish(FadeOut(fadeOutduration));
         }
 
-        // TODO: Add some variety to "follow cam"
+        // Generate a random angle between the start and end angles at the given degree step
+        // ex: a step of 90 will generate a random angle of 0, 90, 180, or 270.
+        private float RandomAngle(float step, float start = 0f, float end = 360f) {
+            int angle = rn.Next(Convert.ToInt32(start/step), Convert.ToInt32(end/step));
+            return angle * step;
+        }
+
+        // Follow a vehicle from above.
         private IEnumerator FollowCam(ushort id) {
             float duration = 7;
             int fadeRoutine = StartRoutine(FadeInOut(duration));
-            yield return WaitForRoutineToFinish(FollowVehicle(id, duration));
+            yield return WaitForRoutineToFinish(FollowVehicle(id, duration, 50, 45, RandomAngle(45)));
             AbortRoutine(fadeRoutine);
         }
 
