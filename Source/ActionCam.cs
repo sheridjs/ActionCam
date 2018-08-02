@@ -98,6 +98,8 @@ namespace BlueJayBird.ActionCam {
 
         // TODO: Create "chase cam"
 
+        // TODO: Create "aerial cam"
+
         // TODO: Create "fly-by cam"
 
         // TODO: Create "orbit cam"
