@@ -130,10 +130,21 @@ namespace BlueJayBird.ActionCam {
         private IEnumerator ChaseCam(ushort id) {
             float duration = 7;
             int fadeRoutine = StartRoutine(FadeInOut(duration));
-            // TODO: Fix bumpiness
-            int camRoutine = FollowVehicle(id, duration, 40, 15, 0, true);
+            int camRoutine = StartRoutine(ChaseRoutine(id, duration));
             yield return WaitForRoutineToFinish(camRoutine);
             AbortRoutine(fadeRoutine);
+        }
+
+        // Manual camera control routine to chase a car without dodging buildings.
+        private IEnumerator ChaseRoutine(ushort id, float duration) {
+            float time = 0;
+            float x, y, z, angle;
+            while (time < duration) {
+                GetVehiclePosition(id, out x, out y, out z, out angle);
+                SetCameraTarget(x, y, z, 40, 15, angle);
+                yield return WaitForNextFrame();
+                time += timeDelta;
+            }
         }
 
         // Follow a vehicle from overhead
