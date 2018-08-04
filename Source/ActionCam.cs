@@ -61,11 +61,6 @@ namespace BlueJayBird.ActionCam {
             while (true) {                
                 ushort carid = ChooseVehicle();
                 Debug.Log(LOG_MARKER + "vehicle id = " + carid);
-                if (0 == carid) {
-                    // TODO: Look for a better way to handle cars not found.
-                    yield return WaitForNextFrame();
-                    continue;
-                }
 
                 yield return WaitForRoutineToFinish(ChooseRoutine(carid));
             }
@@ -74,30 +69,46 @@ namespace BlueJayBird.ActionCam {
         // Choose a random vehicle from a random available service.
         // If no item found, it will return an ID of 0.
         private ushort ChooseVehicle() {
-            Service service = SERVICES[rn.Next(0, SERVICES.Length)];
-            return GetRandomVehicle(service);
+            int index = rn.Next(0, SERVICES.Length);
+            ushort id = GetRandomVehicle(SERVICES[index]);
+
+            if (0 == id) {
+                // If not found, check the other services for vehicles before returning.
+                int nextIndex = (index + 1) % SERVICES.Length;
+                while (0 == id && nextIndex != index) {
+                    id = GetRandomVehicle(SERVICES[nextIndex]);
+                    nextIndex = ++nextIndex % SERVICES.Length;
+                }
+            }
+
+            return id;
         }
 
         private int ChooseRoutine(ushort id) {
             IEnumerator routine;
-            
-            // Randomly select from available camera routines
-            ActionCamRoutine routineType = CAM_ROUTINES[rn.Next(0, CAM_ROUTINES.Length)];
-            switch (routineType)
-            {
-                case ActionCamRoutine.AerialCam:
-                    routine = AerialCam(id);
-                    break;
-                case ActionCamRoutine.ChaseCam:
-                    routine = ChaseCam(id);
-                    break;
-                case ActionCamRoutine.FollowCam:
-                    routine = FollowCam(id);
-                    break;
-                default:
-                    // TODO: Create "last resort" road follow camera routine
-                    routine = FollowCam(id);
-                    break;
+
+            if (id != 0) {     
+                // Randomly select from available camera routines
+                ActionCamRoutine routineType = CAM_ROUTINES[rn.Next(0, CAM_ROUTINES.Length)];
+                switch (routineType)
+                {
+                    case ActionCamRoutine.AerialCam:
+                        routine = AerialCam(id);
+                        break;
+                    case ActionCamRoutine.ChaseCam:
+                        routine = ChaseCam(id);
+                        break;
+                    case ActionCamRoutine.FollowCam:
+                        routine = FollowCam(id);
+                        break;
+                    default:
+                        // We shouldn't hit this case, but just in case..
+                        routine = RoadCam();
+                        break;
+                }
+            } else {
+                // If no car, just use the road camera.
+                routine = RoadCam();
             }
             
             return StartRoutine(routine);
@@ -162,6 +173,14 @@ namespace BlueJayBird.ActionCam {
 
         // TODO: Create "static watch cam" (like Mario Kart) (overhead version?)
 
+        // Follow a random road
+        private IEnumerator RoadCam() {
+            float duration = 7;
+            int fadeRoutine = StartRoutine(FadeInOut(duration, 2, 2));
+            int camRoutine = FollowRoad(GetRandomRoad(), 15, duration, 75, 30, RandomAngle(15));
+            yield return WaitForRoutineToFinish(camRoutine);
+            AbortRoutine(fadeRoutine);
+        }
     }
 
 }
