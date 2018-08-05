@@ -45,6 +45,7 @@ namespace BlueJayBird.ActionCam {
             ActionCamRoutine.AerialCam,
             ActionCamRoutine.ChaseCam,
             ActionCamRoutine.FollowCam,
+            ActionCamRoutine.OrbitCam,
         };
         
         // Random number generator.
@@ -100,6 +101,9 @@ namespace BlueJayBird.ActionCam {
                         break;
                     case ActionCamRoutine.FollowCam:
                         routine = FollowCam(id);
+                        break;
+                    case ActionCamRoutine.OrbitCam:
+                        routine = OrbitCam(id);
                         break;
                     default:
                         // We shouldn't hit this case, but just in case..
@@ -167,9 +171,30 @@ namespace BlueJayBird.ActionCam {
             AbortRoutine(fadeRoutine);
         }
 
-        // TODO: Create "fly-by cam"
+        // Orbit a vehicle
+        private IEnumerator OrbitCam(ushort id) {
+            float duration = 7;
+            int fadeRoutine = StartRoutine(FadeInOut(duration));
+            int camRoutine = StartRoutine(OrbitRoutine(id, duration, 10));
+            yield return WaitForRoutineToFinish(camRoutine);
+            AbortRoutine(fadeRoutine);
+        }
 
-        // TODO: Create "orbit cam"
+        // Manual camera control routine to orbit a moving vehicle
+        private IEnumerator OrbitRoutine(ushort id, float duration, float degreesPerSecond) {
+            float time = 0;
+            float x, y, z, vehicleAngle;
+            float angle = RandomAngle(1);
+            while (time < duration) {
+                GetVehiclePosition(id, out x, out y, out z, out vehicleAngle);
+                SetCameraTarget(x, y, z, 75, 60, angle);
+                yield return WaitForNextFrame();
+                time += timeDelta;
+                angle += timeDelta * degreesPerSecond;
+            }
+        }
+
+        // TODO: Create "fly-by cam"
 
         // TODO: Create "static watch cam" (like Mario Kart) (overhead version?)
 
