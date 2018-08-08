@@ -46,6 +46,7 @@ namespace BlueJayBird.ActionCam {
             ActionCamRoutine.ChaseCam,
             ActionCamRoutine.FollowCam,
             ActionCamRoutine.OrbitCam,
+            // ActionCamRoutine.StaticCam, // TODO include when complete
         };
         
         // Random number generator.
@@ -105,6 +106,9 @@ namespace BlueJayBird.ActionCam {
                     case ActionCamRoutine.OrbitCam:
                         routine = OrbitCam(id);
                         break;
+                    case ActionCamRoutine.StaticCam:
+                        routine = StaticCam(id);
+                        break;
                     default:
                         // We shouldn't hit this case, but just in case..
                         routine = RoadCam();
@@ -130,6 +134,17 @@ namespace BlueJayBird.ActionCam {
         private float RandomAngle(float step, float start = 0f, float end = 360f) {
             int angle = rn.Next(Convert.ToInt32(start/step), Convert.ToInt32(end/step));
             return angle * step;
+        }
+
+        // Calculate a point at a given distance, vertical, and horizontalangle from a given point.
+        private void DistantPoint(float x, float y, float z, float distance, float hAngle, float vAngle, 
+                out float xOut, out float yOut, out float zOut) {
+            float hAngleRad = hAngle * Mathf.Deg2Rad;
+            float vAngleRad = vAngle * Mathf.Deg2Rad;
+            // In Unity, Y is up. Calculate the distant point with XZ as the horizontal plane.
+            xOut = x + distance * Mathf.Cos(hAngleRad) * Mathf.Cos(vAngleRad);
+            yOut = y + distance * Mathf.Sin(vAngleRad);
+            zOut = z + distance * Mathf.Sin(hAngleRad) * Mathf.Cos(vAngleRad);
         }
 
         // Follow a vehicle from above at an angle.
@@ -197,6 +212,29 @@ namespace BlueJayBird.ActionCam {
         // TODO: Create "fly-by cam"
 
         // TODO: Create "static watch cam" (like Mario Kart) (overhead version?)
+        private IEnumerator StaticCam(ushort id) {
+            // TODO Fade
+            int camRoutine = StartRoutine(StaticRoutine(id));
+            yield return WaitForRoutineToFinish(camRoutine);
+        }
+
+        private IEnumerator StaticRoutine(ushort id) {
+            float time = 0;
+            float x, y, z, vehicleAngle;
+            float camX, camY, camZ;
+            // TODO Set proper starting point for camera.
+            // TODO Set accurate focus distance.
+            // TODO End routine if car travels away from camera?
+            while (time < 7) {
+                GetVehiclePosition(id, out x, out y, out z, out vehicleAngle);
+                DistantPoint(x,y,z,50,45,45, out camX, out camY, out camZ);
+                SetPosition(camX, camY, camZ);
+                FaceTowards(x, y, z);
+                SetFocusDistance(50);
+                yield return WaitForNextFrame();
+                time += timeDelta;
+            }
+        }
 
         // Follow a random road
         private IEnumerator RoadCam() {
