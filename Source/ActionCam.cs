@@ -46,7 +46,7 @@ namespace BlueJayBird.ActionCam {
             ActionCamRoutine.ChaseCam,
             ActionCamRoutine.FollowCam,
             ActionCamRoutine.OrbitCam,
-            // ActionCamRoutine.StaticCam, // TODO include when complete
+            ActionCamRoutine.StaticCam,
         };
         
         // Random number generator.
@@ -136,15 +136,16 @@ namespace BlueJayBird.ActionCam {
             return angle * step;
         }
 
-        // Calculate a point at a given distance, vertical, and horizontalangle from a given point.
-        private void DistantPoint(float x, float y, float z, float distance, float hAngle, float vAngle, 
-                out float xOut, out float yOut, out float zOut) {
-            float hAngleRad = hAngle * Mathf.Deg2Rad;
+        // Calculate a point at a given distance, vertical, and horizontal angle from a given point.
+        private void DistantPoint(Vector3 point, float distance, float hAngle, float vAngle, 
+                out Vector3 outPoint) {
+            // Adjust horizontal angle so behavior matches other Skylines routines where 0 is behind vehicle.
+            float hAngleRad = (-90 - hAngle) * Mathf.Deg2Rad;
             float vAngleRad = vAngle * Mathf.Deg2Rad;
             // In Unity, Y is up. Calculate the distant point with XZ as the horizontal plane.
-            xOut = x + distance * Mathf.Cos(hAngleRad) * Mathf.Cos(vAngleRad);
-            yOut = y + distance * Mathf.Sin(vAngleRad);
-            zOut = z + distance * Mathf.Sin(hAngleRad) * Mathf.Cos(vAngleRad);
+            outPoint.x = point.x + distance * Mathf.Cos(hAngleRad) * Mathf.Cos(vAngleRad);
+            outPoint.y = point.y + distance * Mathf.Sin(vAngleRad);
+            outPoint.z = point.z + distance * Mathf.Sin(hAngleRad) * Mathf.Cos(vAngleRad);
         }
 
         // Follow a vehicle from above at an angle.
@@ -171,6 +172,7 @@ namespace BlueJayBird.ActionCam {
             float x, y, z, angle;
             while (time < duration) {
                 GetVehiclePosition(id, out x, out y, out z, out angle);
+                // TODO Decrease chase distance or angle
                 SetCameraTarget(x, y, z, 40, 15, angle);
                 yield return WaitForNextFrame();
                 time += timeDelta;
@@ -200,6 +202,7 @@ namespace BlueJayBird.ActionCam {
             float time = 0;
             float x, y, z, vehicleAngle;
             float angle = RandomAngle(1);
+            // TODO Randomize orbit direction
             while (time < duration) {
                 GetVehiclePosition(id, out x, out y, out z, out vehicleAngle);
                 SetCameraTarget(x, y, z, 75, 60, angle);
@@ -211,26 +214,37 @@ namespace BlueJayBird.ActionCam {
 
         // TODO: Create "fly-by cam"
 
-        // TODO: Create "static watch cam" (like Mario Kart) (overhead version?)
+        // Watch a vehicle from a fixed position.
         private IEnumerator StaticCam(ushort id) {
-            // TODO Fade
-            int camRoutine = StartRoutine(StaticRoutine(id));
+            float duration = 7;
+            int fadeRoutine = StartRoutine(FadeInOut(duration));
+            int camRoutine = StartRoutine(StaticRoutine(id, duration));
             yield return WaitForRoutineToFinish(camRoutine);
+            AbortRoutine(fadeRoutine);
         }
 
-        private IEnumerator StaticRoutine(ushort id) {
+        // Manual camera routine to watch a vehicle from a fixed point.
+        private IEnumerator StaticRoutine(ushort id, float duration) {
             float time = 0;
-            float x, y, z, vehicleAngle;
-            float camX, camY, camZ;
-            // TODO Set proper starting point for camera.
-            // TODO Set accurate focus distance.
-            // TODO End routine if car travels away from camera?
-            while (time < 7) {
-                GetVehiclePosition(id, out x, out y, out z, out vehicleAngle);
-                DistantPoint(x,y,z,50,45,45, out camX, out camY, out camZ);
-                SetPosition(camX, camY, camZ);
-                FaceTowards(x, y, z);
-                SetFocusDistance(50);
+            Vector3 vehPos = new Vector3();
+            float vehAngle;
+            // TODO Randomize offset
+            float offset = 170;
+
+            // Starting point for vehicle and camera.
+            Vector3 camPos = new Vector3();
+            GetVehiclePosition(id, out vehPos.x, out vehPos.y, out vehPos.z, out vehAngle);
+            DistantPoint(vehPos, 100, vehAngle + offset, 15, out camPos);
+            SetPosition(camPos.x, camPos.y, camPos.z, true);
+
+            // Face the vehicle and focus on it.
+            while (time < duration) {
+                if (time > 0) {
+                    GetVehiclePosition(id, out vehPos.x, out vehPos.y, out vehPos.z, out vehAngle);
+                }
+                FaceTowards(vehPos.x, vehPos.y, vehPos.z);
+                SetFocusDistance((vehPos - camPos).magnitude);
+                // TODO End routine if car travels away from camera?
                 yield return WaitForNextFrame();
                 time += timeDelta;
             }
