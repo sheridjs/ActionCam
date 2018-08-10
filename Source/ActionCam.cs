@@ -136,6 +136,11 @@ namespace BlueJayBird.ActionCam {
             return angle * step;
         }
 
+        // Generate a random true or false value.
+        private Boolean Maybe() {
+            return rn.Next(2) == 1;
+        }
+
         // Calculate a point at a given distance, vertical, and horizontal angle from a given point.
         private void DistantPoint(Vector3 point, float distance, float hAngle, float vAngle, 
                 out Vector3 outPoint) {
@@ -201,13 +206,13 @@ namespace BlueJayBird.ActionCam {
             float time = 0;
             float x, y, z, vehicleAngle;
             float angle = RandomAngle(1);
-            // TODO Randomize orbit direction
+            float speed = Maybe() ? degreesPerSecond : -degreesPerSecond;
             while (time < duration) {
                 GetVehiclePosition(id, out x, out y, out z, out vehicleAngle);
                 SetCameraTarget(x, y, z, 75, 60, angle);
                 yield return WaitForNextFrame();
                 time += timeDelta;
-                angle += timeDelta * degreesPerSecond;
+                angle += timeDelta * speed;
             }
         }
 
@@ -227,8 +232,7 @@ namespace BlueJayBird.ActionCam {
             float time = 0;
             Vector3 vehPos = new Vector3();
             float vehAngle;
-            // TODO Randomize offset
-            float offset = 170;
+            float offset = Maybe() ? 170 : 190;
 
             // Starting point for vehicle and camera.
             Vector3 camPos = new Vector3();
