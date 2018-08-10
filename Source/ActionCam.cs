@@ -47,6 +47,7 @@ namespace BlueJayBird.ActionCam {
             ActionCamRoutine.FollowCam,
             ActionCamRoutine.OrbitCam,
             ActionCamRoutine.StaticCam,
+            ActionCamRoutine.FlyByCam,
         };
         
         // Random number generator.
@@ -108,6 +109,9 @@ namespace BlueJayBird.ActionCam {
                         break;
                     case ActionCamRoutine.StaticCam:
                         routine = StaticCam(id);
+                        break;
+                    case ActionCamRoutine.FlyByCam:
+                        routine = FlyByCam(id);
                         break;
                     default:
                         // We shouldn't hit this case, but just in case..
@@ -216,7 +220,53 @@ namespace BlueJayBird.ActionCam {
             }
         }
 
-        // TODO: Create "fly-by cam"
+        // Fly by a vehicle from the side
+        private IEnumerator FlyByCam(ushort id) {
+            float duration = 5;
+            int fadeRoutine = StartRoutine(FadeInOut(duration));
+            int camRoutine = StartRoutine(FlyByRoutine(id, duration));
+            yield return WaitForRoutineToFinish(camRoutine);
+            AbortRoutine(fadeRoutine);
+        }
+
+        // Manual camera routine to fly by a vehicle
+        private IEnumerator FlyByRoutine(ushort id, float duration) {
+            float time = 0;
+            Vector3 vehPos = new Vector3();
+            float vehAngle;
+            Vector3 startPos = new Vector3();
+            float startOffset;
+            Vector3 endPos = new Vector3();
+            float endOffset;
+            float distance = 100;
+            // TODO vertical angle based on type of vehicle?
+            float vAngle = 30;
+
+            if (Maybe()) {
+                startOffset = 30;
+                endOffset = 150;
+            } else {
+                startOffset = -30;
+                endOffset = -150;
+            }
+
+            Vector3 camPos;
+            while (time < duration) {
+                // Get starting point and ending point. (Moves with the vehicle)
+                GetVehiclePosition(id, out vehPos.x, out vehPos.y, out vehPos.z, out vehAngle);
+                DistantPoint(vehPos, distance, vehAngle + startOffset, vAngle, out startPos);
+                DistantPoint(vehPos, distance, vehAngle + endOffset, vAngle, out endPos);
+
+                // Interpolate between start and end positions to set camera position.
+                camPos = Vector3.Lerp(startPos, endPos, time / duration);
+                SetPosition(camPos.x, camPos.y, camPos.z, true);
+                FaceTowards(vehPos.x, vehPos.y, vehPos.z);
+                SetFocusDistance((vehPos - camPos).magnitude);
+
+                yield return WaitForNextFrame();
+                time += timeDelta;
+            }
+        }
 
         // Watch a vehicle from a fixed position.
         private IEnumerator StaticCam(ushort id) {
