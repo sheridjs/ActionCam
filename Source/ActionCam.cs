@@ -172,8 +172,7 @@ namespace BlueJayBird.ActionCam {
             float x, y, z, angle;
             while (time < duration) {
                 GetVehiclePosition(id, out x, out y, out z, out angle);
-                // TODO Decrease chase distance or angle
-                SetCameraTarget(x, y, z, 40, 15, angle);
+                SetCameraTarget(x, y, z, 30, 15, angle);
                 yield return WaitForNextFrame();
                 time += timeDelta;
             }
