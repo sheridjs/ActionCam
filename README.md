@@ -2,6 +2,7 @@
 This is a cinematic camera mod for [Cities: Skylines](https://www.paradoxplaza.com/cities-skylines/CSCS00GSK-MASTER.html). It attemps to follow the action in your city by showing you views of emergency and disaster response vehicles.
 
 ## Notes
+* Cinematic camera scripts are mods, so they disable achievements.
 * Vehicles and camera routines are picked at random. You may get duplicates in a row.
 * Hearses are included under the health category. They are handled like any other vehicle, even if they aren't very action-packed.
 * If no service vehicles are in the city at all, the camera will follow a random road in the city.
