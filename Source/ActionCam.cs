@@ -6,6 +6,7 @@ using System.Collections;
 
 namespace BlueJayBird.ActionCam {
 
+    // Mod details for the mod management page.
 	public class ActionCam : IUserMod {
 
         public static string NAME = "Action Cam!";
@@ -19,6 +20,7 @@ namespace BlueJayBird.ActionCam {
         }
 	}
 
+    // Enumeration of camera routine types.
     public enum ActionCamRoutine {
         AerialCam,
         ChaseCam,
@@ -28,6 +30,7 @@ namespace BlueJayBird.ActionCam {
         StaticCam,
     }
 
+    // The cinematic camera mod class.
     public class ActionCamera : CameraExtensionBase {
 
         // Debug log marker
@@ -41,6 +44,8 @@ namespace BlueJayBird.ActionCam {
             Service.Disaster
         };
 
+        // List of available camera routines.
+        // TODO: Eventually limit available routines by selected target type. (building, car, helicopter, etc.)
         private static ActionCamRoutine[] CAM_ROUTINES = new ActionCamRoutine[] {
             ActionCamRoutine.AerialCam,
             ActionCamRoutine.ChaseCam,
@@ -87,6 +92,8 @@ namespace BlueJayBird.ActionCam {
             return id;
         }
 
+        // Choose a random routine from available routines for the given id and run it.
+        // Returns the routine id.
         private int ChooseRoutine(ushort id) {
             IEnumerator routine;
 
