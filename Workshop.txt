@@ -1,0 +1,16 @@
+This cinematic camera mod attemps to follow the action in your city by showing you views of emergency and disaster response vehicles.
+
+[h1]Notes[/h1]
+[list]
+[*] Vehicles and camera routines are picked at random. You may get duplicates in a row.
+[*] Hearses are included under the health category. They are handled like any other vehicle, even if they aren't very action-packed.
+[*] If no service vehicles are in the city at all, the camera will follow a random road in the city.
+
+[h1]Future[/h1]
+This script currently doesn't have a lot of smarts, and some camera routines might not make a lot of sense for the item being shown. I'd like to add some filters based on properties of the vehicles. For example, if a helicopter is chosen, different camera routines could be available.
+
+If possible, I'd like to include certain buildings like buildings on fire or rubble. Currently the script only follows vehicles.
+
+[h1]Open Source[/h1]
+This mod is available on GitHub under the MIT license.
+[url=https://github.com/sheridjs/ActionCam]https://github.com/sheridjs/ActionCam[/url]
