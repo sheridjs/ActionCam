@@ -1,3 +1,5 @@
+/* MIT License, Copyright 2018 Jay Sheridan */
+
 using ICities;
 using UnityEngine;
 
