@@ -1,4 +1,4 @@
-This cinematic camera mod attempts to follow the action in your city by showing you views of emergency and disaster response vehicles.
+This cinematic camera mod follows the action in your city by showing you views of emergency and disaster response vehicles.
 
 [h1]Notes[/h1]
 [list]
