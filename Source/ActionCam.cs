@@ -5,6 +5,7 @@ using UnityEngine;
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace BlueJayBird.ActionCam {
 
@@ -38,14 +39,6 @@ namespace BlueJayBird.ActionCam {
         // Debug log marker
         private static string LOG_MARKER = "[ActionCam] ";
 
-        // Available services.
-        private static Service[] SERVICES = new Service[] { 
-            Service.FireDepartment, 
-            Service.PoliceDepartment,
-            Service.HealthCare,
-            Service.Disaster
-        };
-
         // List of available camera routines.
         // TODO: Eventually limit available routines by selected target type. (building, car, helicopter, etc.)
         private static ActionCamRoutine[] CAM_ROUTINES = new ActionCamRoutine[] {
@@ -60,8 +53,26 @@ namespace BlueJayBird.ActionCam {
         // Random number generator.
         private System.Random rn = new System.Random();
 
+        // Available services.
+        private Service[] services;
+
         public override string Name() {
             return ActionCam.NAME;
+        }
+
+        public override void OnCreated(ICamera camera) {
+            base.OnCreated(camera);
+
+            var serviceList = new List<Service>(new Service[] { 
+                Service.FireDepartment, 
+                Service.PoliceDepartment,
+                Service.HealthCare
+            });
+            if (managers.application.SupportsExpansion(Expansion.NaturalDisasters)) {
+                serviceList.Add(Service.Disaster);
+                serviceList.Add(Service.Water);
+            }
+            services = serviceList.ToArray();
         }
 
         public override IEnumerator OnStart(ICamera camera) {
@@ -77,15 +88,15 @@ namespace BlueJayBird.ActionCam {
         // Choose a random vehicle from a random available service.
         // If no item found, it will return an ID of 0.
         private ushort ChooseVehicle() {
-            int index = rn.Next(0, SERVICES.Length);
-            ushort id = GetRandomVehicle(SERVICES[index]);
+            int index = rn.Next(0, services.Length);
+            ushort id = GetRandomVehicle(services[index]);
 
             if (0 == id) {
                 // If not found, check the other services for vehicles before returning.
-                int nextIndex = (index + 1) % SERVICES.Length;
+                int nextIndex = (index + 1) % services.Length;
                 while (0 == id && nextIndex != index) {
-                    id = GetRandomVehicle(SERVICES[nextIndex]);
-                    nextIndex = ++nextIndex % SERVICES.Length;
+                    id = GetRandomVehicle(services[nextIndex]);
+                    nextIndex = ++nextIndex % services.Length;
                 }
             }
 
