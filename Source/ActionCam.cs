@@ -70,8 +70,6 @@ namespace BlueJayBird.ActionCam {
 
             while (true) {                
                 ushort carid = ChooseVehicle();
-                Debug.Log(LOG_MARKER + "vehicle id = " + carid);
-
                 yield return WaitForRoutineToFinish(ChooseRoutine(carid));
             }
         }
@@ -306,7 +304,6 @@ namespace BlueJayBird.ActionCam {
                 }
                 FaceTowards(vehPos.x, vehPos.y, vehPos.z);
                 SetFocusDistance((vehPos - camPos).magnitude);
-                // TODO End routine if car travels away from camera?
                 yield return WaitForNextFrame();
                 time += timeDelta;
             }
