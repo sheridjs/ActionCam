@@ -316,7 +316,8 @@ namespace BlueJayBird.ActionCam {
         private IEnumerator RoadCam() {
             float duration = 7;
             int fadeRoutine = StartRoutine(FadeInOut(duration, 2, 2));
-            int camRoutine = FollowRoad(GetRandomRoad(), 15, duration, 75, 30, RandomAngle(15));
+            int camRoutine = FollowRoad(GetRandomRoad(), 15, duration, 75, 
+                    RandomAngle(5, 30, 85), RandomAngle(15), false);
             yield return WaitForRoutineToFinish(camRoutine);
             AbortRoutine(fadeRoutine);
         }
