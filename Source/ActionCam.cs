@@ -60,23 +60,27 @@ namespace BlueJayBird.ActionCam {
             return ActionCam.NAME;
         }
 
-        public override void OnCreated(ICamera camera) {
-            base.OnCreated(camera);
-
+        // Set up services based on availability.
+        public void SetServices(IApplication appManager) {
             var serviceList = new List<Service>(new Service[] { 
                 Service.FireDepartment, 
                 Service.PoliceDepartment,
                 Service.HealthCare
             });
-            if (managers.application.SupportsExpansion(Expansion.NaturalDisasters)) {
+
+            Debug.Log(LOG_MARKER + "Expansion check...");
+            if (appManager.SupportsExpansion(Expansion.NaturalDisasters)) {
+                Debug.Log(LOG_MARKER + "supports Natural Disasters");
                 serviceList.Add(Service.Disaster);
                 serviceList.Add(Service.Water);
             }
+
             services = serviceList.ToArray();
         }
 
         public override IEnumerator OnStart(ICamera camera) {
-            Debug.Log(LOG_MARKER + "camera started");
+            Debug.Log(LOG_MARKER + "Camera started");
+            SetServices(camera.managers.application);
             // TODO: VehicleManager manager = Singleton<VehicleManager>.instance;
 
             while (true) {                
