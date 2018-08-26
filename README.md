@@ -1,6 +1,8 @@
 # Action Cam! A cinematic camera script for Cities: Skylines
 This is a cinematic camera mod for [Cities: Skylines](https://www.paradoxplaza.com/cities-skylines/CSCS00GSK-MASTER.html). It attemps to follow the action in your city by showing you views of emergency and disaster response vehicles.
 
+![Action Cam!](PreviewImage.png)
+
 ## Notes
 * Cinematic camera scripts are mods, so they disable achievements.
 * Vehicles and camera routines are picked at random. You may get duplicates in a row.
